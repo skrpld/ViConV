@@ -21,3 +21,5 @@ Database: MongoDB
 Containerization: Docker  
 
 ## 📲 Installation
+
+Install current stable version from [Releasepage](https://github.com/skrpld/ViConV/releases)
