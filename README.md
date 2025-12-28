@@ -22,4 +22,4 @@ Containerization: Docker
 
 ## 📲 Installation
 
-Install current stable version from [Releasepage](https://github.com/skrpld/ViConV/releases)
+Install current stable version from [Release page](https://github.com/skrpld/ViConV/releases)
