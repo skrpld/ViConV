@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option go_package = "pkg/api/auth";
+
+package auth;
+
+service AuthService {
+  rpc RegistrateUser(RegistrateUserRequest) returns (RegistrateUserResponse){};
+  rpc LoginUser(LoginUserRequest) returns (LoginUserResponse) {};
+  rpc RefreshUserToken(RefreshUserTokenRequest) returns (RefreshUserTokenResponse) {};
+}
+
+message RegistrateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegistrateUserResponse {
+  string message = 1;
+}
+
+message LoginUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginUserResponse {
+  string message = 1;
+  string refreshToken = 2;
+}
+
+message RefreshUserTokenRequest {
+  string refreshToken = 1;
+}
+
+message RefreshUserTokenResponse {
+  string message = 1;
+}
