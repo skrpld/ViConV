@@ -10,16 +10,16 @@ import (
 type Logger interface {
 	Info(msg string, fields ...zap.Field)
 	Error(msg string, fields ...zap.Field)
-	WithFields(fields ...zap.Field) Logger
+	With(fields ...zap.Field) Logger
 }
 type ZapLogger struct {
 	*zap.Logger
 }
 
-func NewLogger() Logger {
+func NewLogger() (Logger, error) {
 	file, err := os.OpenFile("./logs/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	fileCore := zapcore.NewCore(
@@ -38,12 +38,17 @@ func NewLogger() Logger {
 
 	zapLogger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
 
-	if err != nil {
-		return nil
-	}
-	return &ZapLogger{Logger: zapLogger}
+	return &ZapLogger{Logger: zapLogger}, nil
 }
 
-func (l *ZapLogger) WithFields(fields ...zap.Field) Logger {
-	return &ZapLogger{Logger: l.Logger.With(fields...)}
+func (z *ZapLogger) Info(msg string, fields ...zap.Field) {
+	z.Logger.Info(msg, fields...)
+}
+
+func (z *ZapLogger) Error(msg string, fields ...zap.Field) {
+	z.Logger.Error(msg, fields...)
+}
+
+func (z *ZapLogger) With(fields ...zap.Field) Logger {
+	return &ZapLogger{Logger: z.Logger.With(fields...)}
 }

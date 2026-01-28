@@ -2,6 +2,7 @@ package config
 
 import (
 	"viconv/internal/database/mongodb"
+	"viconv/internal/database/postgres"
 	"viconv/internal/transport/grpc/servers"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -9,7 +10,8 @@ import (
 
 type Config struct {
 	servers.ViconvServerConfig
-	mongodb.MongodbConfig
+	mongodb.MongoDBConfig
+	postgres.PostgresConfig
 }
 
 func NewConfig() (*Config, error) {
