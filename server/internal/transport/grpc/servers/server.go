@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 	"viconv/internal/database/mongodb"
 	"viconv/internal/database/postgres"
 	"viconv/internal/logger"
@@ -12,7 +13,9 @@ import (
 	"viconv/internal/transport/grpc/controllers"
 	"viconv/internal/transport/grpc/interceptors"
 	"viconv/pkg/api/auth"
+	"viconv/pkg/api/posts"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -26,6 +29,7 @@ type ViconvServer struct {
 	cfg        ViconvServerConfig
 	grpcServer *grpc.Server
 	listener   net.Listener
+	logger     logger.Logger
 }
 
 func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, mongoDB *mongodb.MongoDB, postgresDB *postgres.PostgresDB, logger logger.Logger) (*ViconvServer, error) {
@@ -38,6 +42,9 @@ func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, mongoDB *mong
 	authSrv := service.NewAuthService(repo, cfg.Secret)
 	authController := controllers.NewAuthController(authSrv)
 
+	postsSrv := service.NewPostsService(repo)
+	postsController := controllers.NewPostsController(postsSrv)
+
 	authInterceptor := interceptors.NewAuthInterceptorHandler(authSrv).AuthInterceptor
 	loggerInterceptor := interceptors.LoggerInterceptor
 
@@ -47,15 +54,17 @@ func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, mongoDB *mong
 
 	grpcServer := grpc.NewServer(opts...)
 	auth.RegisterAuthServiceServer(grpcServer, authController)
+	posts.RegisterPostsServiceServer(grpcServer, postsController)
 
-	return &ViconvServer{cfg, grpcServer, lis}, nil
+	return &ViconvServer{cfg, grpcServer, lis, logger}, nil
 }
 
 func (s *ViconvServer) Start() error {
-	fmt.Printf("Server started on %s:%d\n", s.cfg.Host, s.cfg.Port)
+	s.logger.With(zap.Time("started_at", time.Now())).Info(fmt.Sprintf("Server started on %s:%d", s.cfg.Host, s.cfg.Port))
 	return s.grpcServer.Serve(s.listener)
 }
 
 func (s *ViconvServer) Stop() {
 	s.grpcServer.GracefulStop()
+	s.logger.With(zap.Time("stopped_at", time.Now())).Info("Server stopped")
 }

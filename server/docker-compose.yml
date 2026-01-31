@@ -1,0 +1,123 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres_container
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MONGODB_PORT=${MONGODB_PORT}
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongod.conf:/etc/mongod.conf:ro
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    healthcheck:
+      test: mongosh --quiet --eval "db.adminCommand('ping')"
+      interval: 5s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+    networks:
+      - app-network
+
+  migrate-postgres:
+    image: migrate/migrate:latest
+    container_name: migrate_postgres_container
+    env_file:
+      - .env
+    command:
+      - "-path=/migrations/postgres"
+      - "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      - "up"
+    volumes:
+      - ./migrations/postgres:/migrations/postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  migrate-mongo:
+    image: migrate/migrate:latest
+    container_name: migrate_mongo_container
+    env_file:
+      - .env
+    command:
+      - "-path=/migrations/mongodb"
+      - "-database=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}"
+      - "up"
+    volumes:
+      - ./migrations/mongodb:/migrations/mongodb
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  viconv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: viconv:latest
+    container_name: viconv_container
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_container
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - viconv
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

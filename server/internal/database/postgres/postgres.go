@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 type PostgresConfig struct {
@@ -33,9 +35,13 @@ func NewPostgresDB(cfg PostgresConfig, ctx context.Context) (*PostgresDB, error)
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(25)
+	db.SetMaxOpenConns(25) //TODO: realtime config
 	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(time.Hour)
 
 	return &PostgresDB{db}, nil
+}
+
+func (p *PostgresDB) Close() error {
+	return p.DB.Close()
 }

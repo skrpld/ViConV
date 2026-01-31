@@ -17,7 +17,9 @@ type ZapLogger struct {
 }
 
 func NewLogger() (Logger, error) {
-	file, err := os.OpenFile("./logs/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	path := `./logs`                                                                     // ./var/log/app | ./logs
+	_ = os.Mkdir(path, 0755)                                                             //TODO: вынести директорию в var/..
+	file, err := os.OpenFile(path+"/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666) //TODO: path вынести в real-time cfg
 	if err != nil {
 		return nil, err
 	}

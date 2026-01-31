@@ -4,6 +4,7 @@ import (
 	"time"
 	"viconv/internal/models/dto"
 	"viconv/internal/models/entities"
+	"viconv/pkg/consts"
 	"viconv/pkg/consts/errors"
 	"viconv/pkg/utils/hash"
 	"viconv/pkg/utils/jwt"
@@ -43,7 +44,7 @@ func (s *AuthService) RegistrateUser(rows *dto.RegistrateUserRequest) (*dto.Regi
 		return nil, err
 	}
 
-	refreshTokenExpiryTime := time.Now().Add(time.Hour * 24 * 7)
+	refreshTokenExpiryTime := time.Now().Add(consts.RefreshTokenExpiryTime)
 
 	newUser, err := s.repo.CreateUser(rows.Email, hashPassword, refreshToken, refreshTokenExpiryTime)
 	if err != nil {
@@ -83,7 +84,7 @@ func (s *AuthService) LoginUser(rows *dto.LoginUserRequest) (*dto.LoginUserRespo
 	if err != nil {
 		return nil, err
 	}
-	refreshTokenExpiryTime := time.Now().Add(time.Hour * 24 * 7)
+	refreshTokenExpiryTime := time.Now().Add(consts.RefreshTokenExpiryTime)
 
 	err = s.repo.UpdateRefreshTokenByUserId(user.UserId, refreshToken, refreshTokenExpiryTime)
 	if err != nil {
@@ -120,6 +121,10 @@ func (s *AuthService) RefreshUserToken(rows *dto.RefreshUserTokenRequest) (*dto.
 		return nil, errors.ErrInvalidToken
 	}
 
+	if rows.RefreshToken != user.RefreshToken {
+		return nil, errors.ErrInvalidToken
+	}
+
 	accessToken, err := jwt.NewAccessToken(user.UserId.String(), s.secret)
 	if err != nil {
 		return nil, err
@@ -140,12 +145,12 @@ func (s *AuthService) AuthorizeUser(rows *dto.AuthorizeUserRequest) (*dto.Author
 		return nil, err
 	}
 
-	id, err := tokenClaims.GetSubject()
+	sub, err := tokenClaims.GetSubject()
 	if err != nil {
 		return nil, errors.ErrInvalidToken
 	}
 
-	userId, err := uuid.Parse(id)
+	userId, err := uuid.Parse(sub)
 	if err != nil {
 		return nil, err
 	}
