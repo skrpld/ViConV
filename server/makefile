@@ -1,7 +1,7 @@
 include .env
 export
 
-.PHONY: proto mongodb-up mongodb-down postgres-up postgres-down start docker-up docker-down
+.PHONY: proto mongodb-up mongodb-down postgres-up postgres-down run docker-up docker-down
 
 proto:
 	@protoc -I./proto --go_out=./pkg/api/posts \
@@ -20,7 +20,7 @@ postgres-up:
 postgres-down:
 	@migrate -database 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}' -path migrations/postgres down
 
-start:
+run:
 	@go run cmd/main.go
 
 docker-up:

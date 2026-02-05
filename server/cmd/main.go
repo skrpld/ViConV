@@ -6,33 +6,37 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"viconv/internal/config"
 	"viconv/internal/database/mongodb"
 	"viconv/internal/database/postgres"
-	"viconv/internal/logger"
 	"viconv/internal/transport/grpc/servers"
+
+	"viconv/internal/config"
+	"viconv/internal/logger"
 
 	"go.uber.org/zap"
 )
 
-// TODO: real-time config
+// TODO: real-time config +- Доделать
+//  redis
 //  kafka/rabbitmq?
+//  post message + в controller формирование поста
 
 func main() {
 	ctx := context.Background()
 
-	dbCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	dbCtx, cancel := context.WithTimeout(ctx, 30*time.Second) //TODO: как то переделать
 	defer cancel()
 
-	zapLogger, err := logger.NewLogger()
+	err := config.InitConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	cfg, err := config.NewConfig()
+	cfg := config.GetConfig()
+
+	zapLogger, err := logger.NewLogger(cfg.LoggerConfig)
 	if err != nil {
-		zapLogger.Error("config.NewConfig", zap.Error(err))
-		return
+		panic(err)
 	}
 
 	mongoDB, err := mongodb.NewMongoDB(cfg.MongoDBConfig, dbCtx)

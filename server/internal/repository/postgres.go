@@ -156,7 +156,7 @@ func (r *ViconvRepository) GetPostsByLocation(latitude, longitude, radius float6
 	rows, err := r.postgresDB.Query(query, latitude, longitude, radius, count)
 	if err != nil {
 		if stderr.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("error debug") //TODO: err no posts in radius + тесты когда ошибка срабатывает
+			return nil, fmt.Errorf("error debug") //TODO: err no posts in radius + потестить когда ошибка срабатывает
 		}
 		return nil, err
 	}
@@ -215,13 +215,13 @@ func (r *ViconvRepository) UpdatePostById(post *entities.Post) (*entities.Post, 
 		}
 		return nil, err
 	}
-
+	
 	return &newPost, nil
 }
 
 func (r *ViconvRepository) DeletePostById(postId, userId uuid.UUID) error {
 	query := `DELETE FROM posts WHERE post_id = $1 AND user_id = $2`
-	
+
 	_, err := r.postgresDB.Exec(query, postId, userId)
 	if err != nil {
 		if stderr.Is(err, sql.ErrNoRows) {

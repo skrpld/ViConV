@@ -10,12 +10,12 @@ import (
 )
 
 type PostgresConfig struct {
-	DBName   string `env:"POSTGRES_DB" env-default:"blog"`
-	Port     string `env:"POSTGRES_PORT" env-default:"5432"`
-	Host     string `env:"POSTGRES_HOST" env-default:"localhost"`
-	User     string `env:"POSTGRES_USER" env-default:"postgres"`
-	Password string `env:"POSTGRES_PASSWORD" env-default:"123"`
-	SSLMode  string `env:"POSTGRES_SSLMODE" env-default:"disable"`
+	DBName   string `env:"POSTGRES_DB" env-default:"viconv" mapstructure:"POSTGRES_DB"`
+	Port     string `env:"POSTGRES_PORT" env-default:"5432" mapstructure:"POSTGRES_PORT"`
+	Host     string `env:"POSTGRES_HOST" default:"localhost" mapstructure:"POSTGRES_HOST"`
+	User     string `env:"POSTGRES_USER" env-default:"postgres" mapstructure:"POSTGRES_USER"`
+	Password string `env:"POSTGRES_PASSWORD" env-default:"123" mapstructure:"POSTGRES_PASSWORD"`
+	SSLMode  string `env:"POSTGRES_SSLMODE" env-default:"disable" mapstructure:"POSTGRES_SSLMODE"`
 }
 
 type PostgresDB struct {
@@ -35,7 +35,7 @@ func NewPostgresDB(cfg PostgresConfig, ctx context.Context) (*PostgresDB, error)
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(25) //TODO: realtime config
+	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(time.Hour)
 

@@ -7,6 +7,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+type LoggerConfig struct {
+	LogFilePath string `mapstructure:"LOG_FILE_PATH" env-default:"./logs"`
+}
+
 type Logger interface {
 	Info(msg string, fields ...zap.Field)
 	Error(msg string, fields ...zap.Field)
@@ -16,10 +20,9 @@ type ZapLogger struct {
 	*zap.Logger
 }
 
-func NewLogger() (Logger, error) {
-	path := `./logs`                                                                     // ./var/log/app | ./logs
-	_ = os.Mkdir(path, 0755)                                                             //TODO: вынести директорию в var/..
-	file, err := os.OpenFile(path+"/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666) //TODO: path вынести в real-time cfg
+func NewLogger(cfg LoggerConfig) (Logger, error) {
+	_ = os.Mkdir(cfg.LogFilePath, 0755)
+	file, err := os.OpenFile(cfg.LogFilePath+"/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		return nil, err
 	}

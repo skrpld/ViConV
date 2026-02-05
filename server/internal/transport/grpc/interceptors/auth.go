@@ -29,8 +29,7 @@ var protectedMethods = []string{
 	"LoginUser",
 	"RegistrateUser",
 	"RefreshUserToken",
-} //TODO: refactor мб вынести также в real-time config
-//			куда нить вынести
+}
 
 func (h *AuthInterceptorHandler) AuthInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
