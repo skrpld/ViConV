@@ -1,0 +1,9 @@
+package org.skrpld.viconv.client
+
+class Greeting {
+    private val platform = getPlatform()
+
+    fun greet(): String {
+        return "Hello, ${platform.name}!"
+    }
+}
