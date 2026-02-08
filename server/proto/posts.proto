@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+option go_package = "pkg/api/posts";
+
+package posts;
+
+service PostsService {
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc GetPostById(GetPostByIdRequest) returns (GetPostByIdResponse);
+  rpc GetUserPosts(GetUserPostsRequest) returns (GetUserPostsResponse);
+  rpc GetPostsByLocation(GetPostsByLocationRequest) returns (GetPostsByLocationResponse);
+  rpc UpdatePostById(UpdatePostByIdRequest) returns (UpdatePostByIdResponse);
+  rpc DeletePostById(DeletePostByIdRequest) returns (DeletePostByIdResponse);
+}
+
+message CreatePostRequest {
+  string title = 2;
+  string content = 3;
+  string idempotency_key = 4;
+  double latitude = 5;
+  double longitude = 6;
+}
+
+message CreatePostResponse {
+  string message = 1;
+}
+
+message GetUserPostsRequest{
+  int64 count = 1;
+}
+
+message GetUserPostsResponse {
+  string message = 1;
+}
+
+message GetPostsByLocationRequest{
+  double latitude = 1;
+  double longitude = 2;
+  double radius = 3;
+  int64 count = 4;
+}
+
+message GetPostsByLocationResponse{
+  string message = 1;
+}
+
+message GetPostByIdRequest {
+  string post_id = 1;
+}
+
+message GetPostByIdResponse {
+  string message = 1;
+}
+
+message UpdatePostByIdRequest {
+  string post_id = 1;
+  string title = 2;
+  string content = 3;
+}
+
+message UpdatePostByIdResponse {
+  string message = 1;
+}
+
+message DeletePostByIdRequest {
+  string post_id = 1;
+}
+
+message DeletePostByIdResponse {
+  string message = 1;
+}

@@ -1,0 +1,59 @@
+[
+  {
+    "create": "users",
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": ["email", "password_hash", "refresh_token", "refresh_token_expiry_time"],
+        "properties": {
+          "email": {
+            "bsonType": "string"
+          },
+          "password_hash": {
+            "bsonType": "string"
+          },
+          "refresh_token": {
+            "bsonType": "string"
+          },
+          "refresh_token_expiry_time":{
+            "bsonType": "date"
+          }
+        }
+      }
+    }
+  },
+  {
+    "createIndexes": "users",
+    "indexes": [
+      {
+        "key": {
+          "email": 1
+        },
+        "name": "idx_email_unique",
+        "unique": true,
+        "background": true
+      },
+      {
+        "key": {
+          "refresh_token": 1
+        },
+        "name": "idx_refresh_token",
+        "background": true,
+        "partialFilterExpression": {
+          "refresh_token": {"$exists": true, "$type": "string"}
+        }
+      },
+      {
+        "key": {
+          "refresh_token_expiry_time": 1
+        },
+        "name": "idx_token_expiry_ttl",
+        "background": true,
+        "expireAfterSeconds": 0,
+        "partialFilterExpression": {
+          "refresh_token_expiry_time": {"$exists": true, "$type": "date"}
+        }
+      }
+    ]
+  }
+]
