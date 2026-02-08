@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"viconv/internal/models/dto"
+	"viconv/pkg/consts"
 	"viconv/pkg/consts/errors"
 
 	"google.golang.org/grpc"
@@ -29,6 +30,7 @@ var protectedMethods = []string{
 	"RegistrateUser",
 	"RefreshUserToken",
 } //TODO: refactor мб вынести также в real-time config
+//			куда нить вынести
 
 func (h *AuthInterceptorHandler) AuthInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -47,6 +49,9 @@ func (h *AuthInterceptorHandler) AuthInterceptor() grpc.UnaryServerInterceptor {
 			}
 
 			header := md.Get("authorization")
+			if len(header) == 0 {
+				return nil, errors.ErrInvalidToken
+			}
 
 			token := strings.Split(header[0], " ")
 			if len(token) != 2 && token[0] != "Bearer" {
@@ -60,7 +65,7 @@ func (h *AuthInterceptorHandler) AuthInterceptor() grpc.UnaryServerInterceptor {
 				return nil, errors.ErrInvalidToken
 			}
 
-			ctx = context.WithValue(ctx, "user", user)
+			ctx = context.WithValue(ctx, consts.CtxUserKey, user.User)
 		}
 
 		return handler(ctx, req)

@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"time"
+	"viconv/pkg/consts"
 	"viconv/pkg/consts/errors"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -10,9 +11,9 @@ import (
 func NewAccessToken(id, secret string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS512)
 	token.Claims = jwt.MapClaims{
-		"iss": "viconv", //TODO: вынести в real-time config
+		"iss": consts.IssuedAtField,
 		"sub": id,
-		"exp": time.Now().Add(time.Hour * 2).Unix(), //TODO: вынести в real-time config
+		"exp": time.Now().Add(consts.AccessTokenExpiryTime).Unix(),
 		"iat": time.Now().Unix(),
 	}
 	return token.SignedString([]byte(secret))
@@ -21,9 +22,9 @@ func NewAccessToken(id, secret string) (string, error) {
 func NewRefreshToken(email, secret string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS512)
 	token.Claims = jwt.MapClaims{
-		"iss": "viconv", //TODO: вынести в real-time config
+		"iss": consts.IssuedAtField,
 		"sub": email,
-		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(), //TODO: вынести в real-time config
+		"exp": time.Now().Add(consts.RefreshTokenExpiryTime).Unix(),
 		"iat": time.Now().Unix(),
 	}
 	return token.SignedString([]byte(secret))

@@ -1,23 +1,30 @@
 include .env
+export
 
-.PHONY: proto mongo-up mongo-down postgres-up postgres-down start
+.PHONY: proto mongodb-up mongodb-down postgres-up postgres-down start docker-up docker-down
 
 proto:
-	@protoc -I./proto --go_out=./pkg/api/auth \
-	--go-grpc_out=./pkg/api/auth --go_opt=paths=source_relative \
-	--go-grpc_opt=paths=source_relative ./proto/auth.proto
+	@protoc -I./proto --go_out=./pkg/api/posts \
+	--go-grpc_out=./pkg/api/posts --go_opt=paths=source_relative \
+	--go-grpc_opt=paths=source_relative ./proto/posts.proto
 
-mongo-up:
-	@migrate-mongo up
+mongodb-up:
+	@migrate -database 'mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}' -path migrations/mongodb up
 
-mongo-down:
-	@migrate-mongo down
+mongodb-down:
+	@migrate -database 'mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}' -path migrations/mongodb down
 
 postgres-up:
-	@migrate -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE} -path migrations up
+	@migrate -database 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}' -path migrations/postgres up
 
 postgres-down:
-	@migrate -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE} -path migrations down
+	@migrate -database 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}' -path migrations/postgres down
 
 start:
 	@go run cmd/main.go
+
+docker-up:
+	@docker-compose up --build
+
+docker-down:
+	@docker-compose down -v

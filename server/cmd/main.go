@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 	"viconv/internal/config"
 	"viconv/internal/database/mongodb"
@@ -13,11 +16,12 @@ import (
 )
 
 // TODO: real-time config
+//  kafka/rabbitmq?
 
 func main() {
 	ctx := context.Background()
 
-	dbCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	dbCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	zapLogger, err := logger.NewLogger()
@@ -28,27 +32,47 @@ func main() {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		zapLogger.Error("config.NewConfig", zap.Error(err))
-		panic(err)
+		return
 	}
 
 	mongoDB, err := mongodb.NewMongoDB(cfg.MongoDBConfig, dbCtx)
 	if err != nil {
 		zapLogger.Error("mongodb.NewMongoDB", zap.Error(err))
-		panic(err)
+		return
 	}
 
 	postgresDB, err := postgres.NewPostgresDB(cfg.PostgresConfig, dbCtx)
 	if err != nil {
 		zapLogger.Error("postgres.NewPostgresDB", zap.Error(err))
-		panic(err)
+		return
 	}
 
 	grpcServer, err := servers.NewViconvServer(cfg.ViconvServerConfig, &ctx, mongoDB, postgresDB, zapLogger)
 	if err != nil {
 		zapLogger.Error("servers.NewViconvServer", zap.Error(err))
-		panic(err)
+		return
 	}
-	if err := grpcServer.Start(); err != nil {
-		panic(err)
+
+	graceChan := make(chan os.Signal, 1)
+	signal.Notify(graceChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := grpcServer.Start(); err != nil {
+			zapLogger.Error("grpcServer.Start", zap.Error(err))
+		}
+	}()
+	<-graceChan
+
+	grpcServer.Stop()
+
+	if err = postgresDB.Close(); err != nil {
+		zapLogger.Error("postgresDB.Close", zap.Error(err))
+	} else {
+		zapLogger.With(zap.Time("stopped_at", time.Now())).Info("postgresDB closed")
+	}
+	if err = mongoDB.Close(); err != nil {
+		zapLogger.Error("mongoDB.Close", zap.Error(err))
+	} else {
+		zapLogger.With(zap.Time("stopped_at", time.Now())).Info("mongoDB closed")
 	}
 }

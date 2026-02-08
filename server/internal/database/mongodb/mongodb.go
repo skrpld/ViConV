@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -30,4 +31,19 @@ func NewMongoDB(cfg MongoDBConfig, ctx context.Context) (*MongoDB, error) {
 	db := client.Database(cfg.DBName)
 
 	return &MongoDB{db}, nil
+}
+
+func (m *MongoDB) Close() error {
+	if m.Client() == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := m.Client().Disconnect(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
