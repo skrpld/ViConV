@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"viconv/internal/models/entities"
+	"github.com/skrpld/NearBeee/internal/models/entities"
 
 	"github.com/google/uuid"
 )

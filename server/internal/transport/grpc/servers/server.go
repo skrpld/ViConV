@@ -5,40 +5,41 @@ import (
 	"fmt"
 	"net"
 	"time"
-	"viconv/internal/database/mongodb"
-	"viconv/internal/database/postgres"
-	"viconv/internal/logger"
-	"viconv/internal/repository"
-	"viconv/internal/service"
-	"viconv/internal/transport/grpc/controllers"
-	"viconv/internal/transport/grpc/interceptors"
-	"viconv/pkg/api/auth"
-	"viconv/pkg/api/posts"
+
+	"github.com/skrpld/NearBeee/internal/database/mongodb"
+	"github.com/skrpld/NearBeee/internal/database/postgres"
+	"github.com/skrpld/NearBeee/internal/logger"
+	"github.com/skrpld/NearBeee/internal/repository"
+	"github.com/skrpld/NearBeee/internal/service"
+	"github.com/skrpld/NearBeee/internal/transport/grpc/controllers"
+	"github.com/skrpld/NearBeee/internal/transport/grpc/interceptors"
+	"github.com/skrpld/NearBeee/pkg/api/auth"
+	"github.com/skrpld/NearBeee/pkg/api/posts"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
-type ViconvServerConfig struct {
+type NearBeeeServerConfig struct {
 	Host   string `env:"SERVER_HOST" env-default:"localhost" mapstructure:"SERVER_HOST"`
 	Port   int    `env:"SERVER_PORT" env-default:"50050" mapstructure:"SERVER_PORT"`
 	Secret string `env:"SECRET" env-default:"secret" mapstructure:"SECRET"`
 }
 
-type ViconvServer struct {
-	cfg        ViconvServerConfig
+type NearBeeeServer struct {
+	cfg        NearBeeeServerConfig
 	grpcServer *grpc.Server
 	listener   net.Listener
 	logger     logger.Logger
 }
 
-func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, mongoDB *mongodb.MongoDB, postgresDB *postgres.PostgresDB, logger logger.Logger) (*ViconvServer, error) {
+func NewNearBeeeServer(cfg NearBeeeServerConfig, ctx *context.Context, mongoDB *mongodb.MongoDB, postgresDB *postgres.PostgresDB, logger logger.Logger) (*NearBeeeServer, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
 	if err != nil {
 		return nil, err
 	}
 
-	repo := repository.NewViconvRepository(ctx, postgresDB, mongoDB)
+	repo := repository.NewNearBeeeRepository(ctx, postgresDB, mongoDB)
 	authSrv := service.NewAuthService(repo, cfg.Secret)
 	authController := controllers.NewAuthController(authSrv)
 
@@ -56,15 +57,15 @@ func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, mongoDB *mong
 	auth.RegisterAuthServiceServer(grpcServer, authController)
 	posts.RegisterPostsServiceServer(grpcServer, postsController)
 
-	return &ViconvServer{cfg, grpcServer, lis, logger}, nil
+	return &NearBeeeServer{cfg, grpcServer, lis, logger}, nil
 }
 
-func (s *ViconvServer) Start() error {
+func (s *NearBeeeServer) Start() error {
 	s.logger.With(zap.Time("started_at", time.Now())).Info(fmt.Sprintf("Server started on %s:%d", s.cfg.Host, s.cfg.Port))
 	return s.grpcServer.Serve(s.listener)
 }
 
-func (s *ViconvServer) Stop() {
+func (s *NearBeeeServer) Stop() {
 	s.grpcServer.GracefulStop()
 	s.logger.With(zap.Time("stopped_at", time.Now())).Info("Server stopped")
 }
