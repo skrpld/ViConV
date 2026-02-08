@@ -3,9 +3,10 @@ package interceptors
 import (
 	"context"
 	"strings"
-	"viconv/internal/models/dto"
-	"viconv/pkg/consts"
-	"viconv/pkg/consts/errors"
+
+	"github.com/skrpld/NearBeee/internal/models/dto"
+	"github.com/skrpld/NearBeee/pkg/consts"
+	"github.com/skrpld/NearBeee/pkg/consts/errors"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

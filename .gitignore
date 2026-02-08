@@ -50,7 +50,6 @@ vendor/
 .vscode/
 
 # Docker & Database
-data/
 db-data/
 mongodb-data/
 

@@ -10,7 +10,7 @@ import (
 )
 
 type MongoDBConfig struct {
-	DBName string `env:"MONGODB_DB" env-default:"viconv" mapstructure:"MONGODB_DB"`
+	DBName string `env:"MONGODB_DB" env-default:"nearbeee" mapstructure:"MONGODB_DB"`
 	Host   string `env:"MONGODB_HOST" env-default:"localhost" mapstructure:"MONGODB_HOST"`
 	Port   string `env:"MONGODB_PORT" env-default:"27017" mapstructure:"MONGODB_PORT"`
 }

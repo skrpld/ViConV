@@ -10,7 +10,7 @@ import (
 )
 
 type PostgresConfig struct {
-	DBName   string `env:"POSTGRES_DB" env-default:"viconv" mapstructure:"POSTGRES_DB"`
+	DBName   string `env:"POSTGRES_DB" env-default:"nearbeee" mapstructure:"POSTGRES_DB"`
 	Port     string `env:"POSTGRES_PORT" env-default:"5432" mapstructure:"POSTGRES_PORT"`
 	Host     string `env:"POSTGRES_HOST" default:"localhost" mapstructure:"POSTGRES_HOST"`
 	User     string `env:"POSTGRES_USER" env-default:"postgres" mapstructure:"POSTGRES_USER"`

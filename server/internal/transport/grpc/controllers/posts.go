@@ -3,11 +3,12 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"viconv/internal/models/dto"
-	"viconv/internal/models/entities"
-	"viconv/pkg/api/posts"
-	"viconv/pkg/consts"
-	"viconv/pkg/consts/errors"
+
+	"github.com/skrpld/NearBeee/internal/models/dto"
+	"github.com/skrpld/NearBeee/internal/models/entities"
+	"github.com/skrpld/NearBeee/pkg/api/posts"
+	"github.com/skrpld/NearBeee/pkg/consts"
+	"github.com/skrpld/NearBeee/pkg/consts/errors"
 )
 
 type PostsService interface {

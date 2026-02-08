@@ -6,22 +6,23 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	"viconv/internal/database/mongodb"
-	"viconv/internal/database/postgres"
-	"viconv/internal/logger"
-	"viconv/internal/transport/grpc/servers"
-	"viconv/pkg/utils/jwt"
+
+	"github.com/skrpld/NearBeee/internal/database/mongodb"
+	"github.com/skrpld/NearBeee/internal/database/postgres"
+	"github.com/skrpld/NearBeee/internal/logger"
+	"github.com/skrpld/NearBeee/internal/transport/grpc/servers"
+	"github.com/skrpld/NearBeee/pkg/utils/jwt"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	servers.ViconvServerConfig `mapstructure:",squash"`
-	mongodb.MongoDBConfig      `mapstructure:",squash"`
-	postgres.PostgresConfig    `mapstructure:",squash"`
-	logger.LoggerConfig        `mapstructure:",squash"`
-	jwt.JWTConfig              `mapstructure:",squash"`
+	servers.NearBeeeServerConfig `mapstructure:",squash"`
+	mongodb.MongoDBConfig        `mapstructure:",squash"`
+	postgres.PostgresConfig      `mapstructure:",squash"`
+	logger.LoggerConfig          `mapstructure:",squash"`
+	jwt.JWTConfig                `mapstructure:",squash"`
 }
 
 var (

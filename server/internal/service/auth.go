@@ -2,12 +2,13 @@ package service
 
 import (
 	"time"
-	"viconv/internal/models/dto"
-	"viconv/internal/models/entities"
-	"viconv/pkg/consts/errors"
-	"viconv/pkg/utils/hash"
-	"viconv/pkg/utils/jwt"
-	"viconv/pkg/utils/mail"
+
+	"github.com/skrpld/NearBeee/internal/models/dto"
+	"github.com/skrpld/NearBeee/internal/models/entities"
+	"github.com/skrpld/NearBeee/pkg/consts/errors"
+	"github.com/skrpld/NearBeee/pkg/utils/hash"
+	"github.com/skrpld/NearBeee/pkg/utils/jwt"
+	"github.com/skrpld/NearBeee/pkg/utils/mail"
 
 	"github.com/google/uuid"
 )

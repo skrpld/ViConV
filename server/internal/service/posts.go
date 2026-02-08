@@ -1,9 +1,9 @@
 package service
 
 import (
-	"viconv/internal/models/dto"
-	"viconv/internal/models/entities"
-	"viconv/pkg/consts/errors"
+	"github.com/skrpld/NearBeee/internal/models/dto"
+	"github.com/skrpld/NearBeee/internal/models/entities"
+	"github.com/skrpld/NearBeee/pkg/consts/errors"
 
 	"github.com/google/uuid"
 )

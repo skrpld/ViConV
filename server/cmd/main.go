@@ -6,12 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"viconv/internal/database/mongodb"
-	"viconv/internal/database/postgres"
-	"viconv/internal/transport/grpc/servers"
 
-	"viconv/internal/config"
-	"viconv/internal/logger"
+	"github.com/skrpld/NearBeee/internal/database/mongodb"
+	"github.com/skrpld/NearBeee/internal/database/postgres"
+	"github.com/skrpld/NearBeee/internal/transport/grpc/servers"
+
+	"github.com/skrpld/NearBeee/internal/config"
+	"github.com/skrpld/NearBeee/internal/logger"
 
 	"go.uber.org/zap"
 )
@@ -51,9 +52,9 @@ func main() {
 		return
 	}
 
-	grpcServer, err := servers.NewViconvServer(cfg.ViconvServerConfig, &ctx, mongoDB, postgresDB, zapLogger)
+	grpcServer, err := servers.NewNearBeeeServer(cfg.NearBeeeServerConfig, &ctx, mongoDB, postgresDB, zapLogger)
 	if err != nil {
-		zapLogger.Error("servers.NewViconvServer", zap.Error(err))
+		zapLogger.Error("servers.NewNearBeeeServer", zap.Error(err))
 		return
 	}
 

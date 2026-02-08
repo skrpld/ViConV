@@ -1,6 +1,6 @@
 package dto
 
-import "viconv/internal/models/entities"
+import "github.com/skrpld/NearBeee/internal/models/entities"
 
 type RegistrateUserRequest struct {
 	Email    string `json:"email"`

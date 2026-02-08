@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"time"
-	"viconv/internal/logger"
-	"viconv/pkg/consts/errors"
+
+	"github.com/skrpld/NearBeee/internal/logger"
+	"github.com/skrpld/NearBeee/pkg/consts/errors"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

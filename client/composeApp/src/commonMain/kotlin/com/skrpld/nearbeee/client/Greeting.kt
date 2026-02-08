@@ -1,4 +1,4 @@
-package org.skrpld.viconv.client
+package com.skrpld.nearbeee.client
 
 class Greeting {
     private val platform = getPlatform()

@@ -10,14 +10,14 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o ./bin/viconv ./cmd/main.go
+RUN go build -o ./bin/nearbeee ./cmd/main.go
 
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
-COPY --from=builder /app/bin/viconv /bin/viconv
+COPY --from=builder /app/bin/nearbeee /bin/nearbeee
 COPY --from=builder /app/migrations/ /migrations/
 COPY --from=builder /app/.env /.env
 
-CMD ["/bin/viconv"]
+CMD ["/bin/nearbeee"]

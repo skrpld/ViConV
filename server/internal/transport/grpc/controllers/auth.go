@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"context"
-	"viconv/internal/models/dto"
-	"viconv/pkg/api/auth"
+
+	"github.com/skrpld/NearBeee/internal/models/dto"
+	"github.com/skrpld/NearBeee/pkg/api/auth"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
