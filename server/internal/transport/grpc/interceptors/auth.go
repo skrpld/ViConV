@@ -28,7 +28,7 @@ var protectedMethods = []string{
 	"LoginUser",
 	"RegistrateUser",
 	"RefreshUserToken",
-} //TODO: refactor
+} //TODO: refactor мб вынести также в real-time config
 
 func (h *AuthInterceptorHandler) AuthInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -41,23 +41,15 @@ func (h *AuthInterceptorHandler) AuthInterceptor() grpc.UnaryServerInterceptor {
 		}
 
 		if !isProtected {
-
 			md, ok := metadata.FromIncomingContext(ctx)
 			if !ok {
 				return nil, errors.ErrInvalidToken
 			}
 
 			header := md.Get("authorization")
-			if len(header) == 0 {
-				return nil, errors.ErrInvalidToken
-			}
 
 			token := strings.Split(header[0], " ")
-			if len(token) != 2 {
-				return nil, errors.ErrInvalidToken
-			}
-
-			if token[0] != "Bearer" {
+			if len(token) != 2 && token[0] != "Bearer" {
 				return nil, errors.ErrInvalidToken
 			}
 

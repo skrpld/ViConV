@@ -3,7 +3,6 @@ package interceptors
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 	"viconv/internal/logger"
 	"viconv/pkg/consts/errors"
@@ -20,7 +19,7 @@ func LoggerInterceptor(zapLogger logger.Logger) grpc.UnaryServerInterceptor {
 		requestId := start.UnixNano()
 		method := info.FullMethod
 
-		reqLogger := zapLogger.WithFields(
+		reqLogger := zapLogger.With(
 			zap.String("method", method),
 			zap.String("request_id", fmt.Sprint(requestId)))
 		reqLogger.Info("gRPC request started")
@@ -29,6 +28,7 @@ func LoggerInterceptor(zapLogger logger.Logger) grpc.UnaryServerInterceptor {
 		if err != nil {
 			zap.Error(err)
 		}
+
 		resp, err := handler(ctx, req)
 
 		duration := time.Since(start)
@@ -41,14 +41,17 @@ func LoggerInterceptor(zapLogger logger.Logger) grpc.UnaryServerInterceptor {
 		if err != nil {
 			logFields = append(logFields,
 				zap.Error(err),
-				zap.String("grpc_code", status.Code(err).String()),
+				zap.String("status_code", status.Code(err).String()),
 			)
-			reqLogger.WithFields(logFields...).Error("gRPC request failed")
-			if !strings.Contains(err.Error(), "desc = error:") {
+			reqLogger.With(logFields...).Error("gRPC request failed")
+
+			_, ok := status.FromError(err)
+			if !ok {
 				err = errors.ErrInternalServer
 			}
+
 		} else {
-			reqLogger.WithFields(logFields...).Info("gRPC request completed")
+			reqLogger.With(logFields...).Info("gRPC request completed")
 		}
 		return resp, err
 	}

@@ -1,7 +1,6 @@
 package service
 
 import (
-	stderr "errors"
 	"time"
 	"viconv/internal/models/dto"
 	"viconv/internal/models/entities"
@@ -10,15 +9,14 @@ import (
 	"viconv/pkg/utils/jwt"
 	"viconv/pkg/utils/mail"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
+	"github.com/google/uuid"
 )
 
 type AuthRepository interface {
 	CreateUser(email, passwordHash, refreshToken string, refreshTokenExpiryTime time.Time) (*entities.User, error)
 	GetUserByEmail(email string) (*entities.User, error)
-	UpdateRefreshTokenByUserId(userId bson.ObjectID, refreshToken string, refreshTokenExpiryTime time.Time) error
-	GetUserById(id bson.ObjectID) (*entities.User, error)
+	UpdateRefreshTokenByUserId(userId uuid.UUID, refreshToken string, refreshTokenExpiryTime time.Time) error
+	GetUserById(userId uuid.UUID) (*entities.User, error)
 }
 
 type AuthService struct {
@@ -33,16 +31,6 @@ func NewAuthService(repo AuthRepository, secret string) *AuthService {
 func (s *AuthService) RegistrateUser(rows *dto.RegistrateUserRequest) (*dto.RegistrateUserResponse, error) {
 	if !mail.IsEmailValid(rows.Email) {
 		return nil, errors.ErrInvalidEmail
-	}
-
-	user, err := s.repo.GetUserByEmail(rows.Email)
-	if err != nil {
-		if !stderr.Is(err, mongo.ErrNoDocuments) {
-			return nil, err
-		}
-	}
-	if user != nil {
-		return nil, errors.ErrUserAlreadyExists
 	}
 
 	hashPassword, err := hash.HashString(rows.Password)
@@ -62,13 +50,13 @@ func (s *AuthService) RegistrateUser(rows *dto.RegistrateUserRequest) (*dto.Regi
 		return nil, err
 	}
 
-	accessToken, err := jwt.NewAccessToken(newUser.UserId.Hex(), s.secret)
+	accessToken, err := jwt.NewAccessToken(newUser.UserId.String(), s.secret)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &dto.RegistrateUserResponse{
-		Message:      newUser.UserId.Hex(),
+		Message:      newUser.UserId.String(),
 		RefreshToken: refreshToken,
 		AccessToken:  accessToken,
 	}
@@ -102,13 +90,13 @@ func (s *AuthService) LoginUser(rows *dto.LoginUserRequest) (*dto.LoginUserRespo
 		return nil, err
 	}
 
-	accessToken, err := jwt.NewAccessToken(user.UserId.Hex(), s.secret)
+	accessToken, err := jwt.NewAccessToken(user.UserId.String(), s.secret)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &dto.LoginUserResponse{
-		Message:      user.UserId.Hex(),
+		Message:      user.UserId.String(),
 		RefreshToken: refreshToken,
 		AccessToken:  accessToken,
 	}
@@ -132,13 +120,13 @@ func (s *AuthService) RefreshUserToken(rows *dto.RefreshUserTokenRequest) (*dto.
 		return nil, errors.ErrInvalidToken
 	}
 
-	accessToken, err := jwt.NewAccessToken(user.UserId.Hex(), s.secret)
+	accessToken, err := jwt.NewAccessToken(user.UserId.String(), s.secret)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &dto.RefreshUserTokenResponse{
-		Message:      user.UserId.Hex(),
+		Message:      user.UserId.String(),
 		RefreshToken: accessToken,
 		AccessToken:  accessToken,
 	}
@@ -157,7 +145,7 @@ func (s *AuthService) AuthorizeUser(rows *dto.AuthorizeUserRequest) (*dto.Author
 		return nil, errors.ErrInvalidToken
 	}
 
-	userId, err := bson.ObjectIDFromHex(id)
+	userId, err := uuid.Parse(id)
 	if err != nil {
 		return nil, err
 	}

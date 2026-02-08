@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"viconv/internal/database/mongodb"
+	"viconv/internal/database/postgres"
 	"viconv/internal/logger"
 	"viconv/internal/repository"
 	"viconv/internal/service"
@@ -16,8 +17,8 @@ import (
 )
 
 type ViconvServerConfig struct {
-	Host   string `env:"HOST" env-default:"localhost"`
-	Port   int    `env:"PORT" env-default:"50050"`
+	Host   string `env:"SERVER_HOST" env-default:"localhost"`
+	Port   int    `env:"SERVER_PORT" env-default:"50050"`
 	Secret string `env:"SECRET" env-default:"secret"`
 }
 
@@ -27,13 +28,13 @@ type ViconvServer struct {
 	listener   net.Listener
 }
 
-func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, db *mongodb.DB, logger logger.Logger) (*ViconvServer, error) {
+func NewViconvServer(cfg ViconvServerConfig, ctx *context.Context, mongoDB *mongodb.MongoDB, postgresDB *postgres.PostgresDB, logger logger.Logger) (*ViconvServer, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
 	if err != nil {
 		return nil, err
 	}
 
-	repo := repository.NewViconvRepository(ctx, db)
+	repo := repository.NewViconvRepository(ctx, postgresDB, mongoDB)
 	authSrv := service.NewAuthService(repo, cfg.Secret)
 	authController := controllers.NewAuthController(authSrv)
 
