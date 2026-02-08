@@ -1,4 +1,4 @@
-package org.skrpld.viconv.client
+package com.skrpld.nearbeee.client
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image

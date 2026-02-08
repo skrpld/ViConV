@@ -1,5 +1,6 @@
 package org.skrpld.viconv.client
 
+import com.skrpld.nearbeee.client.Platform
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {

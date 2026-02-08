@@ -1,4 +1,4 @@
-package org.skrpld.viconv.client
+package com.skrpld.nearbeee.client
 
 interface Platform {
     val name: String
