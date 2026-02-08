@@ -47,11 +47,11 @@ kotlin {
 }
 
 android {
-    namespace = "org.skrpld.viconv.client"
+    namespace = "com.skrpld.nearbeee.client"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.skrpld.viconv.client"
+        applicationId = "com.skrpld.nearbeee.client"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
