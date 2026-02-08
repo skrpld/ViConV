@@ -20,9 +20,9 @@ import (
 )
 
 type ViconvServerConfig struct {
-	Host   string `env:"SERVER_HOST" env-default:"localhost"`
-	Port   int    `env:"SERVER_PORT" env-default:"50050"`
-	Secret string `env:"SECRET" env-default:"secret"`
+	Host   string `env:"SERVER_HOST" env-default:"localhost" mapstructure:"SERVER_HOST"`
+	Port   int    `env:"SERVER_PORT" env-default:"50050" mapstructure:"SERVER_PORT"`
+	Secret string `env:"SECRET" env-default:"secret" mapstructure:"SECRET"`
 }
 
 type ViconvServer struct {

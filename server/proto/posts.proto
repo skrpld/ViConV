@@ -16,7 +16,7 @@ service PostsService {
 message CreatePostRequest {
   string title = 2;
   string content = 3;
-  string idempotencyKey = 4;
+  string idempotency_key = 4;
   double latitude = 5;
   double longitude = 6;
 }
@@ -45,7 +45,7 @@ message GetPostsByLocationResponse{
 }
 
 message GetPostByIdRequest {
-  string postId = 1;
+  string post_id = 1;
 }
 
 message GetPostByIdResponse {
@@ -53,7 +53,7 @@ message GetPostByIdResponse {
 }
 
 message UpdatePostByIdRequest {
-  string postId = 1;
+  string post_id = 1;
   string title = 2;
   string content = 3;
 }
@@ -63,7 +63,7 @@ message UpdatePostByIdResponse {
 }
 
 message DeletePostByIdRequest {
-  string postId = 1;
+  string post_id = 1;
 }
 
 message DeletePostByIdResponse {

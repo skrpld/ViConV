@@ -10,9 +10,9 @@ import (
 )
 
 type MongoDBConfig struct {
-	DBName string `env:"MONGODB_DB" env-default:"viconv"`
-	Host   string `env:"MONGODB_HOST" env-default:"localhost"`
-	Port   string `env:"MONGODB_PORT" env-default:"27017"`
+	DBName string `env:"MONGODB_DB" env-default:"viconv" mapstructure:"MONGODB_DB"`
+	Host   string `env:"MONGODB_HOST" env-default:"localhost" mapstructure:"MONGODB_HOST"`
+	Port   string `env:"MONGODB_PORT" env-default:"27017" mapstructure:"MONGODB_PORT"`
 }
 type MongoDB struct {
 	*mongo.Database

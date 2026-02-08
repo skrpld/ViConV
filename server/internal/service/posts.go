@@ -3,7 +3,6 @@ package service
 import (
 	"viconv/internal/models/dto"
 	"viconv/internal/models/entities"
-	"viconv/pkg/consts"
 	"viconv/pkg/consts/errors"
 
 	"github.com/google/uuid"
@@ -83,10 +82,6 @@ func (s *PostsService) GetPostById(rows *dto.GetPostByIdRequest) (*dto.GetPostBy
 	return &response, nil
 }
 
-// UpdatePostById - работает сейчас, что в запросе отправляются только данные, которые изменяются
-// Если что-то не изменяется, то поле = "no_change"
-// Можно переделать, что клиент изначально берет пост, а потом отправляет все поля,
-// Если они не изменились то они просто обновятся на те же значения
 func (s *PostsService) UpdatePostById(rows *dto.UpdatePostByIdRequest) (*dto.UpdatePostByIdResponse, error) {
 	postId, err := uuid.Parse(rows.PostId)
 	if err != nil {
@@ -98,12 +93,8 @@ func (s *PostsService) UpdatePostById(rows *dto.UpdatePostByIdRequest) (*dto.Upd
 		return nil, err
 	}
 
-	if rows.Title != consts.NoChangeKey {
-		post.Title = rows.Title
-	}
-	if rows.Content != consts.NoChangeKey {
-		post.Content = rows.Content
-	}
+	post.Title = rows.Title
+	post.Content = rows.Content
 
 	post, err = s.repo.UpdatePostById(post)
 	if err != nil {
