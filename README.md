@@ -2,10 +2,16 @@
 
 [![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-FFD700?style=flat&logo=kotlin&logoColor=000000)](https://kotlinlang.org/docs/multiplatform.html)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose_UI-000000?style=flat&logo=jetpackcompose&logoColor=FFD700)](https://www.jetbrains.com/lp/compose-multiplatform/)
+[![Ktor](https://img.shields.io/badge/Ktor_Client-FFD700?style=flat&logo=ktor&logoColor=000000)](https://ktor.io/)
+[![Koin](https://img.shields.io/badge/Koin_DI-000000?style=flat&logo=kotlin&logoColor=FFD700)](https://insert-koin.io/)  
 [![Go](https://img.shields.io/badge/Go_Backend-FFD700?style=flat&logo=go&logoColor=000000)](https://go.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-000000?style=flat&logo=postgresql&logoColor=FFD700)](https://www.postgresql.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-FFD700?style=flat&logo=mongodb&logoColor=000000)](https://www.mongodb.com/)
-[![Docker](https://img.shields.io/badge/Docker-000000?style=flat&logo=docker&logoColor=FFD700)](https://www.docker.com/)
+[![Nginx](https://img.shields.io/badge/Nginx_Proxy-000000?style=flat&logo=nginx&logoColor=FFD700)](https://www.nginx.com/)  
+[![Docker](https://img.shields.io/badge/Docker_Compose-FFD700?style=flat&logo=docker&logoColor=000000)](https://www.docker.com/)
+[![Viper](https://img.shields.io/badge/Viper_Config-000000?style=flat&logo=go&logoColor=FFD700)](https://github.com/spf13/viper)
+[![Zap](https://img.shields.io/badge/Zap_Logger-FFD700?style=flat&logo=go&logoColor=000000)](https://github.com/uber-go/zap)
+[![Makefile](https://img.shields.io/badge/GNU_Make-000000?style=flat&logo=gnu-make&logoColor=FFD700)](https://www.gnu.org/software/make/)
 
 **NearBeee** 
 is a geo-social ecosystem that bridges the gap between digital talk and physical locations.
@@ -37,10 +43,14 @@ The project is built on a robust foundation, divided into client and server modu
 * [**KOIN**](https://insert-koin.io/) — pragmatic dependency injection.
 
 ### Server
-* [**Go**](https://go.dev/) — high performance and reliability.
-* [**PostgreSQL**](https://www.postgresql.org/) — primary relational database for structured data.
-* [**MongoDB**](https://www.mongodb.com/) — flexible NoSQL storage for posts and activity logs.
-* [**Docker**](https://www.docker.com/) — containerization for rapid deployment and scaling.
+* [**Go**](https://go.dev/) — high-performance backend core.
+* [**PostgreSQL**](https://www.postgresql.org/) — primary relational database with **golang-migrate** for versioning.
+* [**MongoDB**](https://www.mongodb.com/) — NoSQL storage for flexible data like posts and activity logs.
+* [**Nginx**](https://www.nginx.com/) — high-performance reverse proxy and load balancer.
+* [**Docker & Compose**](https://www.docker.com/) — containerization for consistent deployment and scaling.
+* [**Zap**](https://github.com/uber-go/zap) — blazing fast, structured, leveled logging.
+* [**Viper**](https://github.com/spf13/viper) — complete configuration solution for 12-factor apps.
+* [**Make**](https://www.gnu.org/software/make/) — automation tool for building, testing, and environment setup.
 
 ## 🚀 Installation
 
