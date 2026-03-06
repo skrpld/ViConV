@@ -1,12 +1,7 @@
 include .env
 export
 
-.PHONY: proto mongodb-up mongodb-down postgres-up postgres-down run docker-up docker-down
-
-proto:
-	@protoc -I./proto --go_out=./pkg/api/posts \
-	--go-grpc_out=./pkg/api/posts --go_opt=paths=source_relative \
-	--go-grpc_opt=paths=source_relative ./proto/posts.proto
+.PHONY: mongodb-up mongodb-down postgres-up postgres-down run docker-up docker-down
 
 mongodb-up:
 	@migrate -database 'mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}' -path migrations/mongodb up

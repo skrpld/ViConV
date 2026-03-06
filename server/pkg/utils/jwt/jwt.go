@@ -4,14 +4,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/skrpld/NearBeee/pkg/consts/errors"
+	"github.com/skrpld/NearBeee/pkg/errors"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWTConfig struct {
 	RefreshTokenExpiryTime time.Duration `env:"REFRESH_TOKEN_EXPIRY_TIME" mapstructure:"REFRESH_TOKEN_EXPIRY_TIME" env-default:"168h"`
-	AccessTokenExpiryTime  time.Duration `env:"ACCESS_TOKEN_EXPIRY_TIME" mapstructure:"ACCESS_TOKEN_EXPIRY" env-default:"2h"`
+	AccessTokenExpiryTime  time.Duration `env:"ACCESS_TOKEN_EXPIRY_TIME" mapstructure:"ACCESS_TOKEN_EXPIRY_TIME" env-default:"2h"`
 	IssuedAt               string        `env:"ISSUED_AT" mapstructure:"ISSUED_AT" env-default:"nearbeee"`
 }
 

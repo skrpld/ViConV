@@ -38,7 +38,7 @@ CREATE TRIGGER update_posts_modtime
     FOR EACH ROW
 EXECUTE FUNCTION update_modified_column();
 
-CREATE OR REPLACE FUNCTION haversine_distance(
+CREATE OR REPLACE FUNCTION calculate_distance(
     lat1 DOUBLE PRECISION,
     lon1 DOUBLE PRECISION,
     lat2 DOUBLE PRECISION,

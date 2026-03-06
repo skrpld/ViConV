@@ -7,10 +7,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/skrpld/NearBeee/internal/database/mongodb"
-	"github.com/skrpld/NearBeee/internal/database/postgres"
-	"github.com/skrpld/NearBeee/internal/logger"
-	"github.com/skrpld/NearBeee/internal/transport/grpc/servers"
+	"github.com/skrpld/NearBeee/internal/core/database/mongodb"
+	"github.com/skrpld/NearBeee/internal/core/database/postgres"
+	"github.com/skrpld/NearBeee/internal/core/logger"
+	"github.com/skrpld/NearBeee/internal/transport/rest/servers"
 	"github.com/skrpld/NearBeee/pkg/utils/jwt"
 
 	"github.com/fsnotify/fsnotify"
@@ -18,16 +18,16 @@ import (
 )
 
 type Config struct {
-	servers.NearBeeeServerConfig `mapstructure:",squash"`
-	mongodb.MongoDBConfig        `mapstructure:",squash"`
-	postgres.PostgresConfig      `mapstructure:",squash"`
-	logger.LoggerConfig          `mapstructure:",squash"`
-	jwt.JWTConfig                `mapstructure:",squash"`
+	servers.HttpServerConfig `mapstructure:",squash"`
+	mongodb.MongoDBConfig    `mapstructure:",squash"`
+	postgres.PostgresConfig  `mapstructure:",squash"`
+	logger.LoggerConfig      `mapstructure:",squash"`
+	jwt.JWTConfig            `mapstructure:",squash"`
 }
 
 var (
-	currentConfig  atomic.Pointer[Config]
-	lastReloadTime atomic.Int64
+	currentConfig atomic.Pointer[Config]
+	timer         *time.Timer
 )
 
 func InitConfig() error {
@@ -39,26 +39,25 @@ func InitConfig() error {
 	}
 
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		now := time.Now().UnixNano()
-		last := lastReloadTime.Load()
-
-		if now-last < int64(500*time.Millisecond) {
-			return
+		if timer != nil {
+			timer.Stop()
 		}
 
-		time.Sleep(100 * time.Millisecond) //TODO: чекнуть мб ремув
-		if err := reloadConfig(); err != nil {
-			log.Printf("Error reading config file, %s", err)
-			return
-		}
-
-		lastReloadTime.Store(time.Now().UnixNano())
-
-		log.Println("Configuration updated")
+		timer = time.AfterFunc(200*time.Millisecond, func() {
+			if err := reloadConfig(); err != nil {
+				log.Printf("Error: %v", err)
+				return
+			}
+			log.Println("Configuration updated")
+		})
 	})
 	viper.WatchConfig()
 
 	return nil
+}
+
+func GetConfig() *Config {
+	return currentConfig.Load()
 }
 
 func reloadConfig() error {
@@ -66,7 +65,7 @@ func reloadConfig() error {
 	v.SetConfigFile(".env")
 	v.SetConfigType("env")
 
-	bindStructDefaults(v, Config{})
+	setStructDefaults(v, Config{})
 
 	if err := v.ReadInConfig(); err != nil {
 		return err
@@ -84,11 +83,7 @@ func reloadConfig() error {
 	return nil
 }
 
-func GetConfig() *Config {
-	return currentConfig.Load()
-}
-
-func bindStructDefaults(v *viper.Viper, s interface{}) {
+func setStructDefaults(v *viper.Viper, s interface{}) {
 	val := reflect.ValueOf(s)
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
@@ -99,7 +94,7 @@ func bindStructDefaults(v *viper.Viper, s interface{}) {
 		field := typ.Field(i)
 
 		if field.Anonymous || field.Tag.Get("mapstructure") == ",squash" {
-			bindStructDefaults(v, val.Field(i).Interface())
+			setStructDefaults(v, val.Field(i).Interface())
 			continue
 		}
 

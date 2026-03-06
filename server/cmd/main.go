@@ -7,20 +7,21 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/skrpld/NearBeee/internal/database/mongodb"
-	"github.com/skrpld/NearBeee/internal/database/postgres"
-	"github.com/skrpld/NearBeee/internal/transport/grpc/servers"
+	"github.com/skrpld/NearBeee/internal/core/database/mongodb"
+	"github.com/skrpld/NearBeee/internal/core/database/postgres"
+	"github.com/skrpld/NearBeee/internal/core/logger"
+	"github.com/skrpld/NearBeee/internal/core/repository"
+	"github.com/skrpld/NearBeee/internal/transport/rest/servers"
 
 	"github.com/skrpld/NearBeee/internal/config"
-	"github.com/skrpld/NearBeee/internal/logger"
-
-	"go.uber.org/zap"
 )
 
-// TODO: real-time config +- Доделать
+// TODO:
 //  redis
-//  kafka/rabbitmq?
-//  post message + в controller формирование поста
+//  kafka?
+//  messages с mongo начать делать
+//  создать воркеров и пул работ для распараллеливания
+//  проверка широты\долготы
 
 func main() {
 	ctx := context.Background()
@@ -42,19 +43,21 @@ func main() {
 
 	mongoDB, err := mongodb.NewMongoDB(cfg.MongoDBConfig, dbCtx)
 	if err != nil {
-		zapLogger.Error("mongodb.NewMongoDB", zap.Error(err))
+		zapLogger.Error("mongodb.NewMongoDB", logger.Error(err))
 		return
 	}
 
 	postgresDB, err := postgres.NewPostgresDB(cfg.PostgresConfig, dbCtx)
 	if err != nil {
-		zapLogger.Error("postgres.NewPostgresDB", zap.Error(err))
+		zapLogger.Error("postgres.NewPostgresDB", logger.Error(err))
 		return
 	}
 
-	grpcServer, err := servers.NewNearBeeeServer(cfg.NearBeeeServerConfig, &ctx, mongoDB, postgresDB, zapLogger)
+	repo := repository.NewNearBeeeRepository(postgresDB, mongoDB)
+
+	server, err := servers.NewHttpServer(cfg.HttpServerConfig, repo, zapLogger)
 	if err != nil {
-		zapLogger.Error("servers.NewNearBeeeServer", zap.Error(err))
+		zapLogger.Error("servers.NewNearBeeeServer", logger.Error(err))
 		return
 	}
 
@@ -62,22 +65,24 @@ func main() {
 	signal.Notify(graceChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := grpcServer.Start(); err != nil {
-			zapLogger.Error("grpcServer.Start", zap.Error(err))
+		if err := server.Start(); err != nil {
+			zapLogger.Error("server.Start", logger.Error(err))
 		}
 	}()
 	<-graceChan
 
-	grpcServer.Stop()
+	if err = server.Stop(); err != nil {
+		zapLogger.Error("server.Stop", logger.Error(err))
+	}
 
 	if err = postgresDB.Close(); err != nil {
-		zapLogger.Error("postgresDB.Close", zap.Error(err))
+		zapLogger.Error("postgresDB.Close", logger.Error(err))
 	} else {
-		zapLogger.With(zap.Time("stopped_at", time.Now())).Info("postgresDB closed")
+		zapLogger.With(logger.Time("stopped_at", time.Now())).Info("postgresDB closed")
 	}
 	if err = mongoDB.Close(); err != nil {
-		zapLogger.Error("mongoDB.Close", zap.Error(err))
+		zapLogger.Error("mongoDB.Close", logger.Error(err))
 	} else {
-		zapLogger.With(zap.Time("stopped_at", time.Now())).Info("mongoDB closed")
+		zapLogger.With(logger.Time("stopped_at", time.Now())).Info("mongoDB closed")
 	}
 }
