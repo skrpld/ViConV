@@ -1,0 +1,9 @@
+[
+  {
+    "dropIndexes": "messages",
+    "index": "*"
+  },
+  {
+    "drop": "messages"
+  }
+]

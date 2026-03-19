@@ -1,0 +1,56 @@
+[
+  {
+    "create": "messages",
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": [
+          "post_id",
+          "user_id",
+          "content",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "post_id": {
+            "bsonType": "binData"
+          },
+          "user_id": {
+            "bsonType": "binData"
+          },
+          "content": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "created_at": {
+            "bsonType": "date"
+          },
+          "updated_at": {
+            "bsonType": "date"
+          }
+        }
+      }
+    }
+  },
+  {
+    "createIndexes": "messages",
+    "indexes": [
+      {
+        "key": {
+          "post_id": 1,
+          "created_at": -1
+        },
+        "name": "idx_post_messages_chrono",
+        "background": true
+      },
+      {
+        "key": {
+          "user_id": 1
+        },
+        "name": "idx_user_id",
+        "background": true
+      }
+    ]
+  }
+]
