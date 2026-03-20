@@ -90,14 +90,7 @@ func (c *PostsController) GetPostByPostId(r *http.Request) (any, error) {
 	}
 
 	request.PostId = r.PathValue(web.PostPathValue)
-
-	user, err := web.GetUserFromCtx(r.Context())
-	if err != nil {
-		return nil, err
-	}
-
-	request.UserId = user.UserId
-
+	
 	return c.postsSrv.GetPostByPostId(&request)
 }
 

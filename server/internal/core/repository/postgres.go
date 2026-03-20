@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	stderr "errors"
+	"fmt"
 	"time"
 
 	"github.com/skrpld/NearBeee/internal/core/database/postgres"
@@ -26,10 +27,16 @@ func NewPostgresRepository(postgresDB *postgres.PostgresDB) *PostgresRepository 
 	}
 }
 
+const (
+	usersTableName = "users"
+	postsTableName = "posts"
+)
+
 func (r *PostgresRepository) CreateUser(email, passwordHash, refreshToken string, refreshTokenExpiryTime time.Time) (*entities.User, error) {
 	var user entities.User
 
-	query := `INSERT INTO users (email, password_hash, refresh_token, refresh_token_expiry_time) VALUES ($1, $2, $3, $4) RETURNING *`
+	query := fmt.Sprintf(`INSERT INTO %s (email, password_hash, refresh_token, refresh_token_expiry_time) 
+			VALUES ($1, $2, $3, $4) RETURNING *`, usersTableName)
 
 	err := r.postgresDB.QueryRow(query, email, passwordHash, refreshToken, refreshTokenExpiryTime).
 		Scan(&user.UserId, &user.Email, &user.PasswordHash, &user.RefreshToken, &user.RefreshTokenExpiryTime)
@@ -47,7 +54,7 @@ func (r *PostgresRepository) CreateUser(email, passwordHash, refreshToken string
 func (r *PostgresRepository) GetUserByEmail(email string) (*entities.User, error) {
 	var user entities.User
 
-	query := `SELECT * FROM users WHERE email = $1`
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE email = $1`, usersTableName)
 
 	err := r.postgresDB.QueryRow(query, email).
 		Scan(&user.UserId, &user.Email, &user.PasswordHash, &user.RefreshToken, &user.RefreshTokenExpiryTime)
@@ -65,7 +72,7 @@ func (r *PostgresRepository) GetUserByEmail(email string) (*entities.User, error
 func (r *PostgresRepository) GetUserById(userId uuid.UUID) (*entities.User, error) {
 	var user entities.User
 
-	query := `SELECT * FROM users WHERE user_id = $1`
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE user_id = $1`, usersTableName)
 
 	err := r.postgresDB.QueryRow(query, userId).
 		Scan(&user.UserId, &user.Email, &user.PasswordHash, &user.RefreshToken, &user.RefreshTokenExpiryTime)
@@ -81,7 +88,8 @@ func (r *PostgresRepository) GetUserById(userId uuid.UUID) (*entities.User, erro
 }
 
 func (r *PostgresRepository) UpdateRefreshTokenByUserId(userId uuid.UUID, refreshToken string, refreshTokenExpiryTime time.Time) error {
-	query := `UPDATE users SET refresh_token = $1, refresh_token_expiry_time = $2 WHERE user_id = $3`
+	query := fmt.Sprintf(`UPDATE %s SET refresh_token = $1, refresh_token_expiry_time = $2
+          WHERE user_id = $3`, usersTableName)
 
 	_, err := r.postgresDB.Exec(query, refreshToken, refreshTokenExpiryTime, userId)
 	if err != nil {
@@ -96,7 +104,8 @@ func (r *PostgresRepository) UpdateRefreshTokenByUserId(userId uuid.UUID, refres
 func (r *PostgresRepository) CreatePost(userId uuid.UUID, title, content, idempotencyKey string, latitude, longitude float64) (*entities.Post, error) {
 	var post entities.Post
 
-	query := `INSERT INTO posts (user_id, title, content, idempotency_key, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`
+	query := fmt.Sprintf(`INSERT INTO %s (user_id, title, content, idempotency_key, latitude, longitude)
+			VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, postsTableName)
 
 	err := r.postgresDB.QueryRow(query, userId, title, content, idempotencyKey, latitude, longitude).
 		Scan(&post.PostId, &post.UserId, &post.Title, &post.Content, &post.IdempotencyKey, &post.Latitude, &post.Longitude, &post.CreatedAt, &post.UpdatedAt)
@@ -114,7 +123,8 @@ func (r *PostgresRepository) CreatePost(userId uuid.UUID, title, content, idempo
 func (r *PostgresRepository) GetPostsByUserId(userId uuid.UUID, count int64) ([]*entities.Post, error) {
 	var posts []*entities.Post
 
-	query := `SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE user_id = $1 
+                 ORDER BY created_at DESC LIMIT $2`, postsTableName)
 	rows, err := r.postgresDB.Query(query, userId, parsePostgresLimit(count))
 	if err != nil {
 		if stderr.Is(err, sql.ErrNoRows) {
@@ -144,10 +154,10 @@ func (r *PostgresRepository) GetPostsByUserId(userId uuid.UUID, count int64) ([]
 func (r *PostgresRepository) GetPostsByLocation(latitude, longitude, radius float64, count int64) ([]*entities.Post, error) {
 	var posts []*entities.Post
 
-	query := `SELECT * FROM posts
-		WHERE calculate_distance($1, $2, latitude, longitude) <= $3
-		ORDER BY calculate_distance($1, $2, latitude, longitude) 
-		LIMIT $4`
+	query := fmt.Sprintf(`SELECT * FROM %s
+         WHERE calculate_distance($1, $2, latitude, longitude) <= $3
+         ORDER BY calculate_distance($1, $2, latitude, longitude) 
+         LIMIT $4`, postsTableName)
 
 	rows, err := r.postgresDB.Query(query, latitude, longitude, radius, parsePostgresLimit(count))
 	if err != nil {
@@ -175,11 +185,11 @@ func (r *PostgresRepository) GetPostsByLocation(latitude, longitude, radius floa
 	return posts, nil
 }
 
-func (r *PostgresRepository) GetPostByPostId(postId, userId uuid.UUID) (*entities.Post, error) {
+func (r *PostgresRepository) GetPostByPostId(postId uuid.UUID) (*entities.Post, error) {
 	var post entities.Post
 
-	query := `SELECT * FROM posts WHERE post_id = $1 AND user_id = $2`
-	err := r.postgresDB.QueryRow(query, postId, userId).
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE post_id = $1`, postsTableName)
+	err := r.postgresDB.QueryRow(query, postId).
 		Scan(&post.PostId, &post.UserId,
 			&post.Title, &post.Content,
 			&post.IdempotencyKey, &post.Latitude,
@@ -195,16 +205,17 @@ func (r *PostgresRepository) GetPostByPostId(postId, userId uuid.UUID) (*entitie
 	return &post, nil
 }
 
-func (r *PostgresRepository) UpdatePostById(post *entities.Post) (*entities.Post, error) {
-	var newPost entities.Post
+func (r *PostgresRepository) UpdatePostById(title, content string, postId, userId uuid.UUID) (*entities.Post, error) {
+	var post entities.Post
 
-	query := `UPDATE posts SET title = $1, content = $2 WHERE post_id = $3 AND user_id = $4 RETURNING *`
-
-	err := r.postgresDB.QueryRow(query, post.Title, post.Content, post.PostId, post.UserId).
-		Scan(&newPost.PostId, &newPost.UserId, &newPost.Title,
-			&newPost.Content, &newPost.IdempotencyKey,
-			&newPost.Latitude, &newPost.Longitude,
-			&newPost.CreatedAt, &newPost.UpdatedAt)
+	query := fmt.Sprintf(`UPDATE %s SET title = $1, content = $2 
+          WHERE post_id = $3 AND user_id = $4 RETURNING *`, postsTableName)
+	//TODO: по хорошему добавить проверку на доступ к посту (и месаги) а не просто инвалид пост ид
+	err := r.postgresDB.QueryRow(query, title, content, postId, userId).
+		Scan(&post.PostId, &post.UserId, &post.Title,
+			&post.Content, &post.IdempotencyKey,
+			&post.Latitude, &post.Longitude,
+			&post.CreatedAt, &post.UpdatedAt)
 	if err != nil {
 		if stderr.Is(err, sql.ErrNoRows) {
 			return nil, errors.ErrInvalidPostId
@@ -212,18 +223,26 @@ func (r *PostgresRepository) UpdatePostById(post *entities.Post) (*entities.Post
 		return nil, err
 	}
 
-	return &newPost, nil
+	return &post, nil
 }
 
 func (r *PostgresRepository) DeletePostById(postId, userId uuid.UUID) error {
-	query := `DELETE FROM posts WHERE post_id = $1 AND user_id = $2`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE post_id = $1 AND user_id = $2`, postsTableName)
 
-	_, err := r.postgresDB.Exec(query, postId, userId)
+	result, err := r.postgresDB.Exec(query, postId, userId)
 	if err != nil {
 		if stderr.Is(err, sql.ErrNoRows) {
 			return errors.ErrInvalidPostId
 		}
 		return err
+	}
+
+	countRows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if countRows != 1 {
+		return errors.ErrInvalidPostId
 	}
 
 	return nil

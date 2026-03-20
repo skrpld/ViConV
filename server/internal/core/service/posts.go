@@ -12,8 +12,8 @@ type PostsRepository interface {
 	CreatePost(userId uuid.UUID, title, content, idempotencyKey string, latitude, longitude float64) (*entities.Post, error)
 	GetPostsByUserId(userId uuid.UUID, count int64) ([]*entities.Post, error)
 	GetPostsByLocation(latitude, longitude, radius float64, count int64) ([]*entities.Post, error)
-	GetPostByPostId(postId, userId uuid.UUID) (*entities.Post, error)
-	UpdatePostById(post *entities.Post) (*entities.Post, error)
+	GetPostByPostId(postId uuid.UUID) (*entities.Post, error)
+	UpdatePostById(title, content string, postId, userId uuid.UUID) (*entities.Post, error)
 	DeletePostById(postId, userId uuid.UUID) error
 }
 
@@ -32,7 +32,7 @@ func (s *PostsService) CreatePost(rows *dto.CreatePostRequest) (*dto.CreatePostR
 	}
 
 	response := dto.CreatePostResponse{
-		Message: post.PostId.String(),
+		PostId: post.PostId.String(),
 	}
 
 	return &response, nil
@@ -70,7 +70,7 @@ func (s *PostsService) GetPostByPostId(rows *dto.GetPostByPostIdRequest) (*dto.G
 		return nil, errors.ErrInvalidPostId
 	}
 
-	post, err := s.repo.GetPostByPostId(postId, rows.UserId)
+	post, err := s.repo.GetPostByPostId(postId)
 	if err != nil {
 		return nil, err
 	}
@@ -88,15 +88,7 @@ func (s *PostsService) UpdatePostById(rows *dto.UpdatePostByIdRequest) (*dto.Upd
 		return nil, errors.ErrInvalidPostId
 	}
 
-	post, err := s.repo.GetPostByPostId(postId, rows.UserId)
-	if err != nil {
-		return nil, err
-	}
-
-	post.Title = rows.Title
-	post.Content = rows.Content
-
-	post, err = s.repo.UpdatePostById(post)
+	post, err := s.repo.UpdatePostById(rows.Title, rows.Content, postId, rows.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +112,7 @@ func (s *PostsService) DeletePostById(rows *dto.DeletePostByIdRequest) (*dto.Del
 	}
 
 	response := dto.DeletePostResponse{
-		Message: rows.PostId,
+		PostId: rows.PostId,
 	}
 
 	return &response, nil

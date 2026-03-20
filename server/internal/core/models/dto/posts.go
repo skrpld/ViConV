@@ -6,21 +6,21 @@ import (
 )
 
 type CreatePostRequest struct {
-	UserId         uuid.UUID
-	Title          string  `json:"title"`
-	Content        string  `json:"content"`
-	IdempotencyKey string  `json:"idempotency_key"`
-	Latitude       float64 `json:"latitude"`
-	Longitude      float64 `json:"longitude"`
+	UserId         uuid.UUID `json:"-"`
+	Title          string    `json:"title"`
+	Content        string    `json:"content"`
+	IdempotencyKey string    `json:"idempotency_key"`
+	Latitude       float64   `json:"latitude"`
+	Longitude      float64   `json:"longitude"`
 }
 
 type CreatePostResponse struct {
-	Message string `json:"message"`
+	PostId string `json:"post_id"`
 }
 
 type GetPostsByUserIdRequest struct {
-	UserId uuid.UUID
-	Count  int64 `json:"count"`
+	UserId uuid.UUID `json:"-"`
+	Count  int64     `json:"count"`
 }
 
 type GetPostsByUserIdResponse struct {
@@ -39,8 +39,7 @@ type GetPostsByLocationResponse struct {
 }
 
 type GetPostByPostIdRequest struct {
-	PostId string
-	UserId uuid.UUID
+	PostId string `json:"-"`
 }
 
 type GetPostByPostIdResponse struct {
@@ -48,10 +47,10 @@ type GetPostByPostIdResponse struct {
 }
 
 type UpdatePostByIdRequest struct {
-	PostId  string
-	UserId  uuid.UUID
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	PostId  string    `json:"-"`
+	UserId  uuid.UUID `json:"-"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
 }
 
 type UpdatePostByIdResponse struct {
@@ -59,10 +58,10 @@ type UpdatePostByIdResponse struct {
 }
 
 type DeletePostByIdRequest struct {
-	PostId string
-	UserId uuid.UUID
+	PostId string    `json:"-"`
+	UserId uuid.UUID `json:"-"`
 }
 
 type DeletePostResponse struct {
-	Message string `json:"message"`
+	PostId string `json:"post_id"`
 }
