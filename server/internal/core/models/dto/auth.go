@@ -9,7 +9,7 @@ type RegistrateUserRequest struct {
 	Password string `json:"password"`
 }
 type RegistrateUserResponse struct {
-	Message      string `json:"message"`
+	UserId       string `json:"user_id"`
 	RefreshToken string `json:"-"`
 	AccessToken  string `json:"-"`
 }
@@ -19,7 +19,7 @@ type LoginUserRequest struct {
 	Password string `json:"password"`
 }
 type LoginUserResponse struct {
-	Message      string `json:"message"`
+	UserId       string `json:"user_id"`
 	RefreshToken string `json:"refresh_token"`
 	AccessToken  string `json:"-"`
 }
@@ -28,13 +28,13 @@ type RefreshUserTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 type RefreshUserTokenResponse struct {
-	Message      string `json:"message"`
+	UserId       string `json:"user_id"`
 	RefreshToken string `json:"-"`
 	AccessToken  string `json:"-"`
 }
 
 type AuthorizeUserRequest struct {
-	AccessToken string `json:"access_token"`
+	AccessToken string
 }
 
 type AuthorizeUserResponse struct {

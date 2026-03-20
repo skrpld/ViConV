@@ -6,10 +6,10 @@ import (
 )
 
 type CreateMessageRequest struct {
-	MessageId string
-	PostId    string `json:"post_id"`
-	UserId    uuid.UUID
-	Content   string `json:"content"`
+	MessageId string    `json:"-"`
+	PostId    string    `json:"post_id"`
+	UserId    uuid.UUID `json:"-"`
+	Content   string    `json:"content"`
 }
 
 type CreateMessageResponse struct {
@@ -55,5 +55,5 @@ type DeleteMessageByIdRequest struct {
 }
 
 type DeleteMessageByIdResponse struct {
-	Success bool `json:"status"`
+	Success bool `json:"success"`
 }

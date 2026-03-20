@@ -56,7 +56,7 @@ func (s *AuthService) RegistrateUser(rows *dto.RegistrateUserRequest) (*dto.Regi
 	}
 
 	response := &dto.RegistrateUserResponse{
-		Message:      newUser.UserId.String(),
+		UserId:       newUser.UserId.String(),
 		RefreshToken: refreshToken,
 		AccessToken:  accessToken,
 	}
@@ -96,7 +96,7 @@ func (s *AuthService) LoginUser(rows *dto.LoginUserRequest) (*dto.LoginUserRespo
 	}
 
 	response := &dto.LoginUserResponse{
-		Message:      user.UserId.String(),
+		UserId:       user.UserId.String(),
 		RefreshToken: refreshToken,
 		AccessToken:  accessToken,
 	}
@@ -130,7 +130,7 @@ func (s *AuthService) RefreshUserToken(rows *dto.RefreshUserTokenRequest) (*dto.
 	}
 
 	response := &dto.RefreshUserTokenResponse{
-		Message:      user.UserId.String(),
+		UserId:       user.UserId.String(),
 		RefreshToken: accessToken,
 		AccessToken:  accessToken,
 	}
